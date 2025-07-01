@@ -29,7 +29,7 @@ Roles are assigned during registration via `"role": "USER"` or `"role": "ADMIN"`
 
 ---
 
-## 🛠️ Setup Instructions
+##  Setup Instructions
 
 ### 1. Clone the project and install dependencies
 
@@ -37,3 +37,28 @@ Roles are assigned during registration via `"role": "USER"` or `"role": "ADMIN"`
 git clone https://github.com/nazlicanoztrk/weather-api.git
 cd weather-api-case-study
 npm install
+
+### Environment Setup
+
+You can copy the `.env.example` file and rename it to `.env`:
+
+### Running with Docker
+
+This project uses PostgreSQL and Redis. To run them locally with Docker, you can use the included `docker-compose.yml`.
+
+```bash
+docker-compose up -d
+
+### OpenWeather API
+
+This project uses the OpenWeather API to fetch city-based weather data.
+
+You need to create your own API key from (https://openweathermap.org/api) and add it to your `.env` file:
+
+
+### Initialize the Database (Prisma)
+
+After setting up the environment variables and running the database containers, run the following command to apply Prisma migrations:
+
+```bash
+npx prisma migrate deploy
