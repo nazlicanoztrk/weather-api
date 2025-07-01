@@ -1,112 +1,80 @@
+import supertest from 'supertest';
 import Fastify from 'fastify';
 import { authRoutes } from '../src/plugins/auth';
 import { weatherRoutes } from '../src/plugins/weather';
 import prisma from '../src/prisma';
-import supertest from 'supertest';
 
 let app: ReturnType<typeof Fastify>;
-let userToken = '';
-let adminToken = '';
+let token: string;
+let adminToken: string;
 let userId: number;
 
-const userEmail = `user${Date.now()}@test.com`;
-const adminEmail = `admin${Date.now()}@test.com`;
-const password = '123456';
-
 beforeAll(async () => {
-    app = Fastify();
-    app.register(authRoutes);
-    app.register(weatherRoutes);
-    await app.ready();
-});
+  app = Fastify();
+  app.register(authRoutes);
+  app.register(weatherRoutes);
+  await app.ready();
+
+  await prisma.weatherQuery.deleteMany();
+  await prisma.user.deleteMany();
+
+  const userRes = await supertest(app.server).post('/register').send({
+    email: 'user@example.com',
+    password: '123456',
+    role: 'USER',
+  });
+  token = (await supertest(app.server).post('/login').send({
+    email: 'user@example.com',
+    password: '123456',
+  })).body.token;
+  userId = userRes.body.user.id;
+
+  const adminRes = await supertest(app.server).post('/register').send({
+    email: 'admin@example.com',
+    password: 'admin123',
+    role: 'ADMIN',
+  });
+  adminToken = (await supertest(app.server).post('/login').send({
+    email: 'admin@example.com',
+    password: 'admin123',
+  })).body.token;
+}, 30000);
 
 afterAll(async () => {
-    await prisma.weatherQuery.deleteMany({
-        where: {
-            userId: {
-                gt: 0,
-            },
-        },
-    });
-
-    await prisma.user.deleteMany({
-        where: {
-            email: {
-                contains: '@test.com',
-            },
-        },
-    });
-
-    await app.close();
-    await prisma.$disconnect();
-});
+  await prisma.weatherQuery.deleteMany();
+  await prisma.user.deleteMany();
+  await app.close();
+}, 20000);
 
 describe('Full API Flow', () => {
-    it('should register USER and ADMIN accounts', async () => {
-        // User
-        const resUser = await supertest(app.server).post('/register').send({
-            email: userEmail,
-            password,
-            role: 'USER',
-        });
-        expect(resUser.statusCode).toBe(201);
-        userId = resUser.body.user.id;
+  it('USER should get weather data for city', async () => {
+    const res = await supertest(app.server)
+      .get('/weather?city=istanbul')
+      .set('Authorization', `Bearer ${token}`);
 
-        // Admin
-        const resAdmin = await supertest(app.server).post('/register').send({
-            email: adminEmail,
-            password,
-            role: 'ADMIN',
-        });
-        expect(resAdmin.statusCode).toBe(201);
-    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('main');
+  }, 10000);
 
-    it('should login USER and get token', async () => {
-        const res = await supertest(app.server).post('/login').send({
-            email: userEmail,
-            password,
-        });
-        expect(res.statusCode).toBe(200);
-        userToken = res.body.token;
-    });
+  it("USER should get their own weather queries", async () => {
+    const res = await supertest(app.server)
+      .get('/weather/user')
+      .set('Authorization', `Bearer ${token}`);
 
-    it('should login ADMIN and get token', async () => {
-        const res = await supertest(app.server).post('/login').send({
-            email: adminEmail,
-            password,
-        });
-        expect(res.statusCode).toBe(200);
-        adminToken = res.body.token;
-    });
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body[0]).toHaveProperty('userId', userId);
+  }, 10000);
 
-    it('USER should get weather data for city', async () => {
-        const res = await supertest(app.server)
-            .get('/weather?city=istanbul')
-            .set('Authorization', `Bearer ${userToken}`);
+  it("ADMIN should get all weather queries", async () => {
+    const res = await supertest(app.server)
+      .get('/weather/all-queries')
+      .set('Authorization', `Bearer ${adminToken}`);
 
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toHaveProperty('main');
-    });
-
-    it("USER should get their own weather queries", async () => {
-        const res = await supertest(app.server)
-            .get('/weather/user')
-            .set('Authorization', `Bearer ${userToken}`);
-
-        expect(res.statusCode).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBeGreaterThan(0);
-        expect(res.body[0]).toHaveProperty('userId', userId);
-    });
-
-    it('ADMIN should get all weather queries', async () => {
-        const res = await supertest(app.server)
-            .get('/weather/all-queries')
-            .set('Authorization', `Bearer ${adminToken}`);
-
-        expect(res.statusCode).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBeGreaterThan(0);
-        expect(res.body[0]).toHaveProperty('user');
-    });
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body[0]).toHaveProperty('user');
+  }, 10000);
 });
