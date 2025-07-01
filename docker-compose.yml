@@ -1,0 +1,25 @@
+version: '3.8'
+
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: test-weather-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: weather_postgre_db
+    ports:
+      - "5007:5432"
+
+  redis:
+    image: redis:alpine
+    container_name: test-weather-redis
+    restart: always
+    ports:
+      - "6380:6379"
+
+volumes:
+  pgdata:
+  redisdata:
