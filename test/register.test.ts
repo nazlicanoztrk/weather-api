@@ -44,6 +44,7 @@ afterAll(async () => {
   await prisma.weatherQuery.deleteMany();
   await prisma.user.deleteMany();
   await app.close();
+  await prisma.$disconnect(); 
 }, 20000);
 
 describe('Full API Flow', () => {
