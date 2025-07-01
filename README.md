@@ -1,4 +1,4 @@
-# Weather API – Software Engineer Case Study
+# Weather API
 
 A backend application built with Fastify and TypeScript. It allows users to register, authenticate, and query current weather data by city using the OpenWeather API. Results are cached in Redis for performance and scalability.
 
