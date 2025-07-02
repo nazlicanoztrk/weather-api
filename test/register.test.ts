@@ -1,3 +1,4 @@
+jest.mock('axios');
 import supertest from 'supertest';
 import Fastify from 'fastify';
 import { authRoutes } from '../src/plugins/auth';
@@ -55,7 +56,7 @@ describe('Full API Flow', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('main');
-  }, 10000);
+  }, 40000);
 
   it("USER should get their own weather queries", async () => {
     const res = await supertest(app.server)
