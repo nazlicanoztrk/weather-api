@@ -1,4 +1,3 @@
-jest.mock('axios');
 import supertest from 'supertest';
 import Fastify from 'fastify';
 import { authRoutes } from '../src/plugins/auth';

@@ -35,7 +35,7 @@ jobs:
       NODE_ENV: test
       DATABASE_URL: postgresql://dev:dev@localhost:5432/weather_postgre_db
       JWT_SECRET: 4e2f9b93c1d5a184f14b92c7354e27ea32596ef2c98b8d3f5d9d37b1962fe4b9
-      OPENWEATHER_API_KEY: dummy
+      OPENWEATHER_API_KEY: 9b627032575b6a2f9c87f2202521ad44
       CACHE_TTL: 1000
 
     steps:
