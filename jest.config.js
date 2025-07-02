@@ -8,4 +8,7 @@ module.exports = {
   transform: {
     ...tsJestTransformCfg,
   },
+   moduleNameMapper: {
+    '^axios$': '<rootDir>/__mocks__/axios.ts',
+  },
 };

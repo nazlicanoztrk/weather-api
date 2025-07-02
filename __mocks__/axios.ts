@@ -3,16 +3,8 @@ export default {
     Promise.resolve({
       data: {
         name: 'Istanbul',
-        main: {
-          temp: 25,
-          humidity: 50,
-        },
-        weather: [
-          {
-            main: 'Clear',
-            description: 'clear sky',
-          },
-        ],
+        main: { temp: 25, humidity: 60 },
+        weather: [{ main: 'Clear', description: 'clear sky' }],
       },
     })
   ),

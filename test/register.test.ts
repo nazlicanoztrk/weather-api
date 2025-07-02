@@ -1,12 +1,4 @@
-jest.mock('axios', () => ({
-  get: jest.fn(() => Promise.resolve({
-    data: {
-      name: 'Istanbul',
-      main: { temp: 25 },
-      weather: [{ main: 'Clear', description: 'clear sky' }],
-    },
-  })),
-}))
+jest.mock('axios');
 import supertest from 'supertest';
 import Fastify from 'fastify';
 import { authRoutes } from '../src/plugins/auth';
