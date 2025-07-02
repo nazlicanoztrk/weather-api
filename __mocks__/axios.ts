@@ -1,4 +1,4 @@
-export default {
+const axios = {
   get: jest.fn(() =>
     Promise.resolve({
       data: {
@@ -9,3 +9,6 @@ export default {
     })
   ),
 };
+
+export default axios;
+module.exports = axios;
